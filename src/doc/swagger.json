@@ -1,0 +1,95 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Todo API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation for a Todo management system."
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/todo": {
+      "get": {
+        "summary": "Get all todo items",
+        "description": "Retrieve a list of all todo items.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of todo items."
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new todo item",
+        "description": "Create a new todo item.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Todo item created successfully."
+          }
+        }
+      }
+    },
+    "/api/todo/{taskId}": {
+      "get": {
+        "summary": "Get todo item by ID",
+        "description": "Retrieve a todo item by its ID.",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the todo item"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer authentication token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Todo item details."
+          },
+          "404": {
+            "description": "Todo item not found."
+          }
+        }
+      }
+    }
+  }
+}
