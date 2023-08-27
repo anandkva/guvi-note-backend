@@ -4,5 +4,7 @@ const router = express.Router();
 
 router.post("/register", authController.register);
 router.post("/login", authController.login);
+router.post('/send-reset-otp', authController.sendResetOTP);
+router.post('/reset-password', authController.resetPasswordWithOTP);
 
 module.exports = router;

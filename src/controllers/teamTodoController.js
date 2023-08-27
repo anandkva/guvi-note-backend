@@ -69,3 +69,22 @@ exports.deleteTeamTodo = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const ITEMS_PER_PAGE = 10; // Number of items per page
+
+exports.getAllTeamTodos = async (req, res) => {
+  try {
+    const teamId = req.params.teamId; // Assuming you get teamId from request parameters
+
+    const page = parseInt(req.query.page) || 1; // Get the page number from query parameter
+    const skip = (page - 1) * ITEMS_PER_PAGE;
+
+    const teamTodos = await TeamTodo.find({ teamId })
+      .skip(skip)
+      .limit(ITEMS_PER_PAGE);
+
+    res.json({ teamTodos });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

@@ -9,6 +9,8 @@ router.post(
   personalTodoController.createPersonalTodo
 );
 
+router.get('/personal-todos', authToken, personalTodoController.getAllPersonalTodos);
+
 router.delete(
   "/delete-todo/:id",
   authToken,

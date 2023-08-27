@@ -13,4 +13,10 @@ router.delete(
   teamTodoController.deleteTeamTodo
 );
 
+router.get(
+  "/team-todos/:teamId",
+  authToken,
+  teamTodoController.getAllTeamTodos
+);
+
 module.exports = router;
