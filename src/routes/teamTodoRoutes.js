@@ -3,20 +3,29 @@ const router = express.Router();
 const { authToken } = require("../middleware/auth");
 const teamTodoController = require("../controllers/teamTodoController");
 
-router.post("/create-todo", authToken, teamTodoController.createTeamTodo);
+router.post("/create-goal", authToken, teamTodoController.createTeamTodo);
 
-router.put("/update-todo", authToken, teamTodoController.updateTeamTodo);
+router.put(
+  "/update-goal/:id",
+  authToken,
+  teamTodoController.updateTeamTodo
+);
 
 router.delete(
-  "/delete-todo/:todoId",
+  "/delete-goal/:todoId",
   authToken,
   teamTodoController.deleteTeamTodo
 );
 
 router.get(
-  "/team-todos/:teamId",
+  "/team-goal/:memberId",
   authToken,
-  teamTodoController.getAllTeamTodos
+  teamTodoController.getTeamTodoByMemberIds
+);
+router.get(
+  "/goal/:id",
+  authToken,
+  teamTodoController.getTeamTodoById
 );
 
 module.exports = router;

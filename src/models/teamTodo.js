@@ -1,12 +1,41 @@
 const mongoose = require("mongoose");
 
-const teamTodoSchema = new mongoose.Schema(
+const commentSchema = new mongoose.Schema(
   {
-    teamId: {
+    memberId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Team",
+      ref: "User",
       required: true,
     },
+    text: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const updateSchema = new mongoose.Schema(
+  {
+    by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    comment: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const teamTodoSchema = new mongoose.Schema(
+  {
     title: {
       type: String,
       required: true,
@@ -20,9 +49,16 @@ const teamTodoSchema = new mongoose.Schema(
       enum: ["pending", "inProgress", "completed"],
       default: "pending",
     },
-    createdAt: {
+    members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    comments: [commentSchema],
+    updated: [updateSchema],
+    deadline: {
       type: Date,
-      default: Date.now,
     },
   },
   {

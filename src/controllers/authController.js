@@ -37,7 +37,6 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     const smallEmail = email.toLowerCase();
     const user = await User.findOne({ email: smallEmail });
-    console.log(user);
     if (user === null) {
       return res.json({ message: "User Not Found", code: 3 });
     }
@@ -77,7 +76,7 @@ exports.sendResetOTP = async (req, res) => {
     }
     const otp = generateOTP();
     user.resetOTP = otp;
-    user.resetOTPExpiry = Date.now() + 600000; // OTP valid for 10 minutes
+    user.resetOTPExpiry = Date.now() + 600000;
     await user.save();
     await sendPasswordResetOTP(email, otp);
     res.json({ code: 1, message: "Password reset OTP sent." });
@@ -88,14 +87,12 @@ exports.sendResetOTP = async (req, res) => {
 
 exports.resetPasswordWithOTP = async (req, res) => {
   try {
-    console.log(req.body)
     const { email, otp, newPassword } = req.body;
     const user = await User.findOne({
       email,
       resetOTP: otp,
       resetOTPExpiry: { $gt: Date.now() },
     });
-    console.log("res", user)
     if (!user) {
       return res.json({ code: 0, message: "Invalid or expired OTP." });
     }
@@ -108,5 +105,15 @@ exports.resetPasswordWithOTP = async (req, res) => {
     res.json({ code: 1, message: "Password reset successful." });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, { email: 1, username: 1 });
+
+    res.status(200).json({ code: 1, users });
+  } catch (error) {
+    res.status(500).json({ code: 0, message: "Internal Server Error" });
   }
 };

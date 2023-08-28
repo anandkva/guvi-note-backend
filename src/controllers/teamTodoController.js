@@ -1,46 +1,92 @@
 const TeamTodo = require("../models/teamTodo");
-const Team = require("../models/team");
 
 exports.createTeamTodo = async (req, res) => {
   try {
-    const { teamId, title, description } = req.body;
+    const { title, description, deadline, memberId } = req.body;
+    console.log(req.body);
 
-    const newTeamTodo = new TeamTodo({ teamId, title, description });
+    const newTeamTodo = new TeamTodo({
+      title,
+      description,
+      deadline,
+      members: memberId,
+    });
+
     await newTeamTodo.save();
 
-    const team = await Team.findOne({ _id: teamId });
-    if (!team) {
-      return res.status(404).json({ message: "Team not found" });
-    }
-
-    team.todos.push(newTeamTodo._id); // Assuming todos is an array of ObjectIds
-    await team.save();
-
     res.json({
+      code: 1,
       message: "Team todo created successfully",
       teamTodo: newTeamTodo,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json({ code: 0, message: error.message });
   }
 };
 
 exports.updateTeamTodo = async (req, res) => {
   try {
-    const { todoId, title, description, status } = req.body;
+    const { id } = req.params;
+    const { title, description, status, comment, members, deadline } = req.body;
 
-    const teamTodo = await TeamTodo.findOne({ _id: todoId });
-    if (!teamTodo) {
-      return res.status(404).json({ message: "Team todo not found" });
+    const updatedFields = {};
+
+    if (title) {
+      updatedFields.title = title;
     }
 
-    teamTodo.title = title || teamTodo.title;
-    teamTodo.description = description || teamTodo.description;
-    teamTodo.status = status || teamTodo.status;
+    if (description) {
+      updatedFields.description = description;
+    }
 
-    await teamTodo.save();
+    if (status) {
+      updatedFields.status = status;
+    }
 
-    res.json({ message: "Team todo updated successfully", teamTodo });
+    if (members && members.length > 0) {
+      updatedFields.$addToSet = { members: { $each: members } };
+    }
+
+    if (comment) {
+      const newComment = {
+        memberId: req.auth.id,
+        text: comment,
+      };
+      if (!updatedFields.$push) {
+        updatedFields.$push = {};
+      }
+      updatedFields.$push.comments = newComment;
+
+      const updateRecord = {
+        by: req.auth.id,
+        at: new Date(),
+        comment: "Comment added",
+      };
+      if (!updatedFields.$push) {
+        updatedFields.$push = {};
+      }
+      updatedFields.$push.updated = updateRecord;
+    }
+
+    if (deadline) {
+      updatedFields.deadline = deadline;
+    }
+
+    const updatedTeamTodo = await TeamTodo.findByIdAndUpdate(
+      id,
+      updatedFields,
+      { new: true }
+    );
+
+    if (!updatedTeamTodo) {
+      return res.json({ code: 0, message: "Team todo not found" });
+    }
+
+    res.json({
+      code: 1,
+      message: "Team Goal updated successfully",
+      teamTodo: updatedTeamTodo,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -50,40 +96,55 @@ exports.deleteTeamTodo = async (req, res) => {
   try {
     const { todoId } = req.params;
 
-    const teamTodo = await TeamTodo.findOneAndDelete({ _id: todoId });
-   
-    if (!teamTodo) {
-      return res.status(404).json({ message: "Team todo not found" });
+    const deletedTeamTodo = await TeamTodo.findByIdAndDelete({ _id: todoId });
+
+    if (!deletedTeamTodo) {
+      return res.json({ code: 0, message: "Team todo not found" });
     }
 
-    const team = await Team.findOne({ _id: teamTodo.teamId });
-    if (!team) {
-      return res.status(404).json({ message: "Team not found" });
-    }
-
-    team.todos.pull(todoId);
-    await team.save();
-
-    res.json({ message: "Team todo deleted successfully" });
+    res.json({
+      code: 1,
+      message: "Team todo deleted successfully",
+      deletedTeamTodo,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-const ITEMS_PER_PAGE = 10; // Number of items per page
-
-exports.getAllTeamTodos = async (req, res) => {
+exports.getTeamTodoByMemberIds = async (req, res) => {
   try {
-    const teamId = req.params.teamId; // Assuming you get teamId from request parameters
+    const { memberId } = req.params;
 
-    const page = parseInt(req.query.page) || 1; // Get the page number from query parameter
-    const skip = (page - 1) * ITEMS_PER_PAGE;
+    const teamTodos = await TeamTodo.find(
+      { members: { $in: memberId } },
+      { title: 1, description: 1, deadline: 1, status: 1 }
+    );
 
-    const teamTodos = await TeamTodo.find({ teamId })
-      .skip(skip)
-      .limit(ITEMS_PER_PAGE);
+    res.json({
+      code: 1,
+      message: "Team todos fetched successfully",
+      teamTodos,
+    });
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+};
+exports.getTeamTodoById = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-    res.json({ teamTodos });
+    const teamTodo = await TeamTodo.findById(id);
+
+    if (!teamTodo) {
+      return res.json({ code: 0, message: "Team todo not found" });
+    }
+
+    res.json({
+      code: 1,
+      message: "Team todo fetched successfully",
+      teamTodo,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
