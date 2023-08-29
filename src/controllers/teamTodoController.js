@@ -26,7 +26,6 @@ exports.createTeamTodo = async (req, res) => {
 
 exports.updateTeamTodo = async (req, res) => {
   try {
-    console.log(req.auth);
     const { id } = req.params;
     const { title, description, status, comment, members, deadline } = req.body;
 
@@ -44,8 +43,8 @@ exports.updateTeamTodo = async (req, res) => {
       updatedFields.status = status;
     }
 
-    if (members && members.length > 0) {
-      updatedFields.$addToSet = { members: { $each: members } };
+    if (members) {
+      updatedFields.members = members;
     }
 
     if (comment) {
