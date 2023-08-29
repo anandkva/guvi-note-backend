@@ -60,6 +60,16 @@ const teamTodoSchema = new mongoose.Schema(
     deadline: {
       type: Date,
     },
+    created: {
+      by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      at: {
+        type: Date,
+        default: Date.now,
+      },
+    },
   },
   {
     timestamps: true,

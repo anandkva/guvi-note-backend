@@ -9,6 +9,7 @@ const swaggerDocument = require("./src/doc/swagger.json");
 const authRouter = require("./src/routes/authRoutes");
 const personalTodoRoutes = require("./src/routes/personalTodoRoutes");
 const teamTodoRoutes = require("./src/routes/teamTodoRoutes");
+const mailRoutes = require("./src/routes/mailRoutes");
 const DB_URI = process.env.DATABASE;
 
 
@@ -22,6 +23,7 @@ app.use(cors({ origin: true, credentials: true }));
 app.use("/auth", authRouter);
 app.use("/personal", personalTodoRoutes);
 app.use("/team-todo", teamTodoRoutes);
+app.use("/mail", mailRoutes);
 
 const startServer = async () => {
   await db(DB_URI);

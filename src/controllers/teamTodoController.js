@@ -3,13 +3,13 @@ const TeamTodo = require("../models/teamTodo");
 exports.createTeamTodo = async (req, res) => {
   try {
     const { title, description, deadline, memberId } = req.body;
-    console.log(req.body);
-
+    const createdBy = req.auth.id;
     const newTeamTodo = new TeamTodo({
       title,
       description,
       deadline,
       members: memberId,
+      created: { by: createdBy },
     });
 
     await newTeamTodo.save();
@@ -26,6 +26,7 @@ exports.createTeamTodo = async (req, res) => {
 
 exports.updateTeamTodo = async (req, res) => {
   try {
+    console.log(req.auth);
     const { id } = req.params;
     const { title, description, status, comment, members, deadline } = req.body;
 
@@ -60,7 +61,7 @@ exports.updateTeamTodo = async (req, res) => {
       const updateRecord = {
         by: req.auth.id,
         at: new Date(),
-        comment: "Comment added",
+        comment: `Edited by ${req.auth.email}`,
       };
       if (!updatedFields.$push) {
         updatedFields.$push = {};
@@ -118,8 +119,8 @@ exports.getTeamTodoByMemberIds = async (req, res) => {
 
     const teamTodos = await TeamTodo.find(
       { members: { $in: memberId } },
-      { title: 1, description: 1, deadline: 1, status: 1 }
-    );
+      { title: 1, description: 1, deadline: 1, status: 1, created: 1 }
+    ).populate("created.by", "username");
 
     res.json({
       code: 1,
@@ -133,7 +134,6 @@ exports.getTeamTodoByMemberIds = async (req, res) => {
 exports.getTeamTodoById = async (req, res) => {
   try {
     const { id } = req.params;
-
     const teamTodo = await TeamTodo.findById(id);
 
     if (!teamTodo) {
