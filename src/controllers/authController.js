@@ -38,11 +38,11 @@ exports.login = async (req, res) => {
     const smallEmail = email.toLowerCase();
     const user = await User.findOne({ email: smallEmail });
     if (user === null) {
-      return res.json({ message: "User Not Found", code: 3 });
+      return res.status(404).json({ message: "User Not Found", code: 3 });
     }
     const passwordsMatch = await bcrypt.compare(password, user.password);
     if (!passwordsMatch) {
-      return res.json({ message: "Password Not Matched", code: 2 });
+      return res.status(401).json({ message: "Password Not Matched", code: 2 });
     }
     const token = jwt.sign(
       { id: user._id, email: user.email },
@@ -56,7 +56,7 @@ exports.login = async (req, res) => {
       username: user.username,
       email: user.email,
     };
-    res.json({
+    res.status(200).json({
       message: "Login Successfully",
       code: 1,
       token: token,
@@ -72,7 +72,7 @@ exports.sendResetOTP = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return res.json({ message: "User not found." });
+      return res.status(404).json({ message: "User not found." });
     }
     const otp = generateOTP();
     user.resetOTP = otp;
@@ -94,7 +94,7 @@ exports.resetPasswordWithOTP = async (req, res) => {
       resetOTPExpiry: { $gt: Date.now() },
     });
     if (!user) {
-      return res.json({ code: 0, message: "Invalid or expired OTP." });
+      return res.status(400).json({ code: 0, message: "Invalid or expired OTP." });
     }
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);

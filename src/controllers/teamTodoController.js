@@ -20,7 +20,7 @@ exports.createTeamTodo = async (req, res) => {
       teamTodo: newTeamTodo,
     });
   } catch (error) {
-    res.json({ code: 0, message: error.message });
+    res.status(400).json({ code: 0, message: error.message });
   }
 };
 
@@ -79,7 +79,7 @@ exports.updateTeamTodo = async (req, res) => {
     );
 
     if (!updatedTeamTodo) {
-      return res.json({ code: 0, message: "Team todo not found" });
+      return res.status(404).json({ code: 0, message: "Team todo not found" });
     }
 
     res.json({
@@ -99,7 +99,7 @@ exports.deleteTeamTodo = async (req, res) => {
     const deletedTeamTodo = await TeamTodo.findByIdAndDelete({ _id: todoId });
 
     if (!deletedTeamTodo) {
-      return res.json({ code: 0, message: "Team todo not found" });
+      return res.status(404).json({ code: 0, message: "Team todo not found" });
     }
 
     res.json({
@@ -127,7 +127,7 @@ exports.getTeamTodoByMemberIds = async (req, res) => {
       teamTodos,
     });
   } catch (error) {
-    res.json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 exports.getTeamTodoById = async (req, res) => {
